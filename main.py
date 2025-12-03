@@ -1,12 +1,13 @@
 import sys
 from PySide6.QtWidgets import QApplication
 
-from main_window import MainWindow
+from src.ui.main_window import MainWindow
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    style_path = r"src/ui/style.qss"
     try:
-        with open(r"C:\Users\User\Desktop\testingPY\store_app\ui\style.qss", "r") as f:
+        with open(style_path, "r") as f:
             app.setStyleSheet(f.read())
     except FileNotFoundError:
         print("Stylesheet not found, using default styling")
