@@ -1,0 +1,23 @@
+Base ----------------------------------------
+ultralytics>=8.0.0      # Core AI Model
+opencv-python>=4.8.0    # Computer Vision (cv2)
+numpy>=1.23.0           # Array Processing
+Pillow>=9.5.0           # Image Manipulation
+PyYAML>=6.0             # Config Parsing
+
+GUI (Desktop App) ---------------------------
+PySide6>=6.5.0          # UI Framework
+
+Deep Learning (Backend) ---------------------
+torch>=2.0.0            # Neural Network Engine
+torchvision>=0.15.0     # Vision Utilities
+
+Plotting & Metrics (Training) ---------------
+matplotlib>=3.7.0       # Graph Plotting
+seaborn>=0.12.0         # Heatmaps (Confusion Matrix)
+pandas>=2.0.0           # Data Handling
+
+Utilities -----------------------------------
+tqdm>=4.65.0            # Progress Bars
+psutil>=5.9.0           # System Monitoring
+requests>=2.31.0        # Network (Auto-download weights)
