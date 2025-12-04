@@ -153,7 +153,7 @@ class MainWindow(QWidget):
 
         for item in detected_classes_list:
             if item in self.save_cooldowns:
-                if current_time - self.save_cooldowns[item] < 20: 
+                if current_time - self.save_cooldowns[item] < 5: 
                     continue
                 else:
                     del self.save_cooldowns[item]
