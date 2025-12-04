@@ -5,7 +5,7 @@ from PySide6.QtGui import QImage
 
 class ModelWorker(QThread):
     frame_signal = Signal(QImage)
-    detection_signal = Signal(str)
+    detection_signal = Signal(list) 
 
     def __init__(self, model_path, confidence=0.3):
         super().__init__()
@@ -13,7 +13,6 @@ class ModelWorker(QThread):
         self.conf_threshold = confidence
         self.running = True
 
-        # Class names
         self.waste_class = ["Battery", "Biological", "Cardboard", "Clothes", "Glass",
                             "Metal", "Paper", "Plastic", "Shoes", "Trash"]
 
@@ -29,15 +28,11 @@ class ModelWorker(QThread):
             if not ret:
                 break
 
-            # Convert BGR → RGB
             img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-            # YOLO prediction
             results = self.model.predict(img, verbose=False)
             
-            detected_class = None
+            current_frame_detections = set()
 
-            # Draw boxes (same logic as your script)
             for result in results:
                 for box in result.boxes:
                     conf = float(box.conf[0])
@@ -46,18 +41,18 @@ class ModelWorker(QThread):
 
                     x1, y1, x2, y2 = map(int, box.xyxy[0])
                     cls_id = int(box.cls[0])
-                    label = f"{self.waste_class[cls_id]} ({conf*100:.1f}%)"
+                    class_name = self.waste_class[cls_id]
+                    
+                    current_frame_detections.add(class_name)
 
-                    detected_class = self.waste_class[cls_id]
-
+                    label = f"{class_name} ({conf*100:.1f}%)"
                     cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
                     cv2.putText(frame, label, (x1, y1 - 10),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.8,
                                 (0, 255, 0), 2)
-            if detected_class:
-                self.detection_signal.emit(detected_class)
             
-            # Convert to QImage for PySide6
+            self.detection_signal.emit(list(current_frame_detections))
+            
             rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             h, w, ch = rgb_frame.shape
             bytes_per_line = ch * w
