@@ -168,7 +168,7 @@ class MainWindow(QWidget):
                 save_to_database(item, bin_name)
                 
                 print(f"✓ Saved: {item} → {bin_name}")
-                self.save_message.setText(f"Saved: {item} ({bin_name})") 
+                self.save_message.setText(f"{item} Move to {bin_name}") 
                 self.clear_message_timer.start(3000)
                 
                 self.save_cooldowns[item] = current_time
