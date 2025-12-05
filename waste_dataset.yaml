@@ -1,0 +1,23 @@
+# YOLOv8 Dataset Configuration for Smart Waste Classification
+
+# Paths to images
+train: dataset/images/train
+val: dataset/images/validation
+
+# Number of classes
+nc: 10  
+
+# Class names
+# You can copy-paste from classes.txt or leave as placeholders
+names:
+  0: battery
+  1: biological
+  2: cardboard
+  3: clothes
+  4: glass
+  5: metal
+  6: paper
+  7: plastic
+  8: shoes
+  9: trash
+  
