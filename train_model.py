@@ -1,56 +1,36 @@
-import tensorflow as tf
-from tensorflow.keras import layers, models
-from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
+import os
+from ultralytics import YOLO
 
-# Data preprocessing
-train_datagen = ImageDataGenerator(
-    rescale=1./255,
-    validation_split=0.2,
-    rotation_range=20,        # randomly rotate images
-    width_shift_range=0.1,    # shift horizontally
-    height_shift_range=0.1,   # shift vertically
-    shear_range=0.1,          # shear transformation
-    zoom_range=0.1,           # zoom in/out
-    horizontal_flip=True,     # flip images horizontally
-    fill_mode='nearest'       # fill in empty pixels after transforms
+MODEL_PATH = "models/waste_yolo.pt"  # Path to saved trained model
+DATA_YAML = "waste_dataset.yaml"
+EPOCHS = 100
+IMG_SIZE = 768
+BATCH = 16
+
+# Load existing trained model if it exists, otherwise start new YOLOv8n model
+if os.path.exists(MODEL_PATH):
+    model = YOLO(MODEL_PATH)    # Load previously trained weights
+    resume_flag = False        # Do NOT resume optimizer state
+else:
+    model = YOLO("yolov8n.yaml")  # Create a new YOLOv8n model from scratch
+    resume_flag = False
+
+results = model.train(
+    data=DATA_YAML,
+    epochs=EPOCHS,
+    imgsz=IMG_SIZE,
+    batch=BATCH,
+    pretrained=True,     # Start from pretrained COCO weights
+    resume=resume_flag, # Resume training only if explicitly allowed
+    save_period=-1,
+    save=True,
 )
 
-train_data = train_datagen.flow_from_directory(
-    r'C:\Users\User\Desktop\SmartWasteClass\dataset\waste_kaggle',
-    target_size=(256,256),
-    batch_size=32,
-    subset='training'
-)
+BEST_MODEL_PATH = "runs/detect/train/weights/best.pt"
 
-val_data = train_datagen.flow_from_directory(
-    r'C:\Users\User\Desktop\SmartWasteClass\dataset\waste_kaggle',
-    target_size=(256,256),
-    batch_size=32,
-    subset='validation'
-)
-
-# Model structure
-model = models.Sequential([
-    layers.Conv2D(32, (3,3), activation='relu', input_shape=(256,256,3)),
-    layers.MaxPooling2D(2,2),
-    layers.Conv2D(64, (3,3), activation='relu'),
-    layers.MaxPooling2D(2,2),
-    layers.Flatten(),
-    layers.Dense(128, activation='relu'),
-    layers.Dropout(0.5),       # 50% neurons dropped
-    layers.Dense(12, activation='softmax')
-])
-
-# Compile
-model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
-
-early_stop = EarlyStopping(monitor='val_loss', patience=6, restore_best_weights=True)
-
-checkpoint = ModelCheckpoint('models/waste_model.keras', monitor='val_accuracy', save_best_only=True)
-
-# Train
-model.fit(train_data, validation_data=val_data, epochs=30, callbacks=[early_stop, checkpoint])
-
-# Save model
-model.save('models/waste_model.keras') 
+if os.path.exists(BEST_MODEL_PATH):
+    os.makedirs(os.path.dirname(MODEL_PATH), exist_ok=True)
+    os.replace(BEST_MODEL_PATH, MODEL_PATH)
+    print(f"Best model saved to: {MODEL_PATH}")
+else:
+    print("Best model not found")
